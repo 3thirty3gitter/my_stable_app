@@ -1,17 +1,15 @@
-# app.py
 from flask import Flask
-from routes import main
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 from flask_migrate import Migrate
-import os
 
+# Initialize Flask app
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your-secret-key'  # Replace with a secure key
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_URL", "sqlite:///site.db")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'your_secret_key_here'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 
+# Initialize extensions
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
@@ -19,7 +17,9 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 migrate = Migrate(app, db)
 
-app.register_blueprint(main)
+# Import models AFTER initializing db and login_manager
+from models import User
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# Import routes AFTER setting up everything
+from routes import main as main_blueprint
+app.register_blueprint(main_blueprint)
